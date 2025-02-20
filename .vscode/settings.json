@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "lv_dclock.h": "c",
+        "lv_txt.h": "c",
+        "custom.h": "c",
+        "gui_guider.h": "c",
+        "events_init.h": "c",
+        "widgets_init.h": "c"
+    }
+}
