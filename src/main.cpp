@@ -4,6 +4,7 @@
 #include "gui_guider.h"
 #include "events_init.h" //用引号括起来的，这说明编译器会先在当前文件所在的目录里找这个头文件
 #include "OneButton.h"
+#include "lv_port_indev.h"
 
 lv_ui guider_ui;
 
@@ -19,19 +20,32 @@ static lv_color_t buf[ screenWidth * screenHeight / 10 ];
 
 TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
 
-
+int key_state = -1;
 void doubleclick()
 {
+  key_state = 2;
   Serial.println("doubleclick");
+  Serial.println(key_state);
 }
 void click()
 {
+  key_state = 1;
   Serial.println("click");
+  Serial.println(key_state);
 }
 void longclick()
 {
+  key_state = 3;
   Serial.println("longclick");
+  Serial.println(key_state);
 }
+void idle()
+{
+  key_state = 0;
+  Serial.println("idle");
+  Serial.println(key_state);
+}
+
 
 
 /* Display flushing */
@@ -57,7 +71,7 @@ void setup()
   button.attachClick(click);
   button.attachDoubleClick(doubleclick);
   button.attachLongPressStart(longclick);
-
+  button.attachIdle(idle);
 
     lv_init();
 
@@ -75,7 +89,9 @@ void setup()
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register( &disp_drv );
-  
+
+    lv_port_indev_init();
+
     setup_ui( &guider_ui );
     events_init( &guider_ui );
  
@@ -84,7 +100,7 @@ void setup()
 void loop()
 {
     // Serial.println("tft & lvgl");
-    button.tick();
+    button.tick(); //监听按键引脚
     lv_timer_handler(); /* let the GUI do its work */
     delay( 5 );
 }

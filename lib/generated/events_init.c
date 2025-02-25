@@ -16,6 +16,19 @@
 #endif
 
 
+static void screen_sw_1_event_handler (lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+
+	switch (code) {
+	default:
+		break;
+	}
+}
+void events_init_screen(lv_ui *ui)
+{
+	lv_obj_add_event_cb(ui->screen_sw_1, screen_sw_1_event_handler, LV_EVENT_ALL, ui);
+}
 
 void events_init(lv_ui *ui)
 {
