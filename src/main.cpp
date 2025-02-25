@@ -3,8 +3,13 @@
 #include "demos\lv_demos.h"
 #include "gui_guider.h"
 #include "events_init.h" //用引号括起来的，这说明编译器会先在当前文件所在的目录里找这个头文件
+#include "OneButton.h"
 
 lv_ui guider_ui;
+
+#define PIN_INPUT 5
+
+OneButton button(PIN_INPUT, true);//pin : 按钮的pin角 activeLow : true:按下为低电平 false : 按下为高电平 pullupActive : 如果有上拉电阻就激活上拉电阻
 
 static const uint16_t screenWidth  = 240;
 static const uint16_t screenHeight = 240;
@@ -13,6 +18,21 @@ static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ screenWidth * screenHeight / 10 ];
 
 TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
+
+
+void doubleclick()
+{
+  Serial.println("doubleclick");
+}
+void click()
+{
+  Serial.println("click");
+}
+void longclick()
+{
+  Serial.println("longclick");
+}
+
 
 /* Display flushing */
 void my_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p )
@@ -32,6 +52,12 @@ void my_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *
 void setup()
 {
     Serial.begin(115200);
+    
+  button.reset();//清除一下按钮状态机的状态
+  button.attachClick(click);
+  button.attachDoubleClick(doubleclick);
+  button.attachLongPressStart(longclick);
+
 
     lv_init();
 
@@ -57,7 +83,8 @@ void setup()
 
 void loop()
 {
-    Serial.println("tft & lvgl");
+    // Serial.println("tft & lvgl");
+    button.tick();
     lv_timer_handler(); /* let the GUI do its work */
     delay( 5 );
 }
