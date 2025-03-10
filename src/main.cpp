@@ -1,106 +1,64 @@
 #include <lvgl.h>
 #include <TFT_eSPI.h>
+#include <SimpleFOC.h>
 #include "demos\lv_demos.h"
 #include "gui_guider.h"
 #include "events_init.h" //用引号括起来的，这说明编译器会先在当前文件所在的目录里找这个头文件
 #include "OneButton.h"
 #include "lv_port_indev.h"
+#include "lv_port_disp.h"
+#include "button.h"
+#include "motor.h"
+
 
 lv_ui guider_ui;
-
-#define PIN_INPUT 5
-
-OneButton button(PIN_INPUT, true);//pin : 按钮的pin角 activeLow : true:按下为低电平 false : 按下为高电平 pullupActive : 如果有上拉电阻就激活上拉电阻
-
-static const uint16_t screenWidth  = 240;
-static const uint16_t screenHeight = 240;
-
-static lv_disp_draw_buf_t draw_buf;
-static lv_color_t buf[ screenWidth * screenHeight / 10 ];
-
-TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
-
-int key_state = -1;
-void doubleclick()
-{
-  key_state = 2;
-  Serial.println("doubleclick");
-  Serial.println(key_state);
-}
-void click()
-{
-  key_state = 1;
-  Serial.println("click");
-  Serial.println(key_state);
-}
-void longclick()
-{
-  key_state = 3;
-  Serial.println("longclick");
-  Serial.println(key_state);
-}
-void idle()
-{
-  key_state = 0;
-  Serial.println("idle");
-  Serial.println(key_state);
-}
-
-
-
-/* Display flushing */
-void my_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p )
-{
-    uint32_t w = ( area->x2 - area->x1 + 1 );
-    uint32_t h = ( area->y2 - area->y1 + 1 );
-
-    tft.startWrite();
-    tft.setAddrWindow( area->x1, area->y1, w, h );
-    tft.pushColors( ( uint16_t * )&color_p->full, w * h, true );
-    tft.endWrite();
-
-    lv_disp_flush_ready( disp_drv );
-}
-
 
 void setup()
 {
     Serial.begin(115200);
     
-  button.reset();//清除一下按钮状态机的状态
-  button.attachClick(click);
-  button.attachDoubleClick(doubleclick);
-  button.attachLongPressStart(longclick);
-  button.attachIdle(idle);
-
     lv_init();
-
-    tft.begin();          /* TFT init */
-    tft.setRotation( 3 ); /* Landscape orientation, flipped */
-
-    lv_disp_draw_buf_init( &draw_buf, buf, NULL, screenWidth * screenHeight / 10 );
-
-    /*Initialize the display*/
-    static lv_disp_drv_t disp_drv;
-    lv_disp_drv_init( &disp_drv );
-    /*Change the following line to your display resolution*/
-    disp_drv.hor_res = screenWidth;
-    disp_drv.ver_res = screenHeight;
-    disp_drv.flush_cb = my_disp_flush;
-    disp_drv.draw_buf = &draw_buf;
-    lv_disp_drv_register( &disp_drv );
-
+    lv_port_disp_init();
     lv_port_indev_init();
 
     setup_ui( &guider_ui );
     events_init( &guider_ui );
- 
+
+    motor_init();
+
 }
 
 void loop()
 {
-    // Serial.println("tft & lvgl");
-    button.tick(); //监听按键引脚
-    lv_timer_handler(); /* let the GUI do its work */
-    delay( 5 );
+
+     Serial.print("tft & lvgl");
+     Serial.print("    loop() running on core ");
+     Serial.println(xPortGetCoreID());
+    // button.handle();
+    // lv_timer_handler(); /* let the GUI do its work */
+    delay( 1000 );
 }
+
+
+/**
+FreeRTOS作为ESP32的操作系统，提供了多任务支持，可以使得这两个核心同时工作，
+双核，包含核心0（CPU0）和核心1（CPU1），在不使用freeRTOS情况下程序是跑在核心1上，而核心0主要运行WIFI和bluetooth
+Core 1（默认）通常用来运行系统的主任务和控制逻辑，也通常是应用程序的入口点（即 app_main() 函数）
+
+两种方式创建任务
+xTaskCreate()： 这个函数不指定任务运行在哪个核心上，FreeRTOS调度器将根据系统负载和可用资源自动分配任务到不同的核心。
+xTaskCreatePinnedToCore()： 允许你明确指定任务应该被调度到哪个核心上运行
+
+
+
+使用示例
+TaskHandle_t myTaskHandle;
+void myTask(void* parameter) {
+  // 任务代码
+}
+ 
+void setup() {
+  xTaskCreatePinnedToCore(myTask, "My Task", 2048, NULL, 1, &myTaskHandle, 1);
+}
+ 
+ */
