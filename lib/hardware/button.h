@@ -6,6 +6,7 @@
  */
 #include <Arduino.h>
 #include <OneButton.h>
+#include "power.h"
 
 int key_state = -1;
 
@@ -24,7 +25,7 @@ public:
   }
 
   void Clicked(){
-    key_state = 1;
+    key_state = 0;
     Serial.println("Click then value++");
     value++;
   }
@@ -32,10 +33,12 @@ public:
   void DoubleClicked(){
     key_state = 2;
     Serial.println("DoubleClick");
+    
+    power_off();
   }
 
   void LongPressed(){
-    key_state = 0;
+    key_state = 1;
     Serial.println("LongPress and the value is");
   }
     
