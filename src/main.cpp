@@ -44,7 +44,9 @@ void loop()
   // Serial.println(xPortGetCoreID());
   unsigned long currentMillis = millis(); // millis()是 Arduino 中获取开机以来毫秒数的函数
   RGB_start(currentMillis);               // 用于函数内部的时间基准计算，根据当前时间规划灯带亮灭、颜色变化的时序逻辑,避免传统 delay() 导致的程序卡顿
-  myrainbow(255);
+  // myrainbow(255);
+  colorWipe(strip.Color(255,   0,   0), 20);    // Red
+  strip.show();
 
   button.handle();
 

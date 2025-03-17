@@ -29,6 +29,10 @@
         "streambuf": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "random": "cpp",
+        "cmath": "cpp",
+        "new": "cpp",
+        "memory": "cpp"
     }
 }

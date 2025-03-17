@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include <OneButton.h>
 #include "power.h"
+#include "RGB.h"
 
 int key_state = -1;
 
@@ -28,6 +29,8 @@ public:
     key_state = 0;
     Serial.println("Click then value++");
     value++;
+    colorWipe(strip.Color(  0, 255,   0), 20);    // Green
+    strip.show();
   }
 
   void DoubleClicked(){
